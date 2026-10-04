@@ -1,0 +1,2028 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prepress Job Manager</title>
+    <meta name="description" content="Professional prepress job management and artwork tracking system for printing departments.">
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --accent: #2563eb;
+            --accent-light: #3b82f6;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            min-height: 100vh;
+        }
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            transition: transform 0.3s ease;
+            z-index: 50;
+        }
+        .sidebar a,
+        .sidebar button {
+            color: var(--gray-300);
+            transition: all 0.2s;
+            border-radius: 8px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .sidebar a:hover,
+        .sidebar button:hover,
+        .sidebar a.active,
+        .sidebar button.active {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+        .sidebar a i,
+        .sidebar button i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .sidebar .logo {
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .sidebar .logo h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+        .sidebar .logo span {
+            font-size: 11px;
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            padding: 24px 28px;
+            max-width: 100%;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .stat-card .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            background: #fff;
+            box-shadow: var(--shadow);
+        }
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .table-wrap th {
+            background: var(--gray-50);
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-600);
+            border-bottom: 2px solid var(--gray-200);
+            white-space: nowrap;
+        }
+        .table-wrap td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+            vertical-align: middle;
+        }
+        .table-wrap tr:hover td {
+            background: #f8faff;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        .badge-new {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .badge-in-progress {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .badge-pending-approval {
+            background: #fce4ec;
+            color: #b91c1c;
+        }
+        .badge-approved {
+            background: #d1fae5;
+            color: #047857;
+        }
+        .badge-completed {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .badge-urgent {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .badge-overdue {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+        .badge-digital {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+        .badge-offset {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+        .priority-high {
+            color: #dc2626;
+            font-weight: 600;
+        }
+        .priority-medium {
+            color: #d97706;
+            font-weight: 600;
+        }
+        .priority-low {
+            color: #16a34a;
+            font-weight: 600;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #fff;
+            color: var(--gray-800);
+        }
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+        .form-input.error {
+            border-color: var(--danger);
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 5px;
+        }
+        .form-label .required {
+            color: var(--danger);
+            margin-left: 2px;
+        }
+        .btn {
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--gray-300);
+            color: var(--gray-700);
+        }
+        .btn-outline:hover {
+            background: var(--gray-100);
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            padding: 24px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius);
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+        }
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: var(--gray-300);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .toggle-switch.active::after {
+            left: 20px;
+        }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gray-700);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                transform: translateX(-100%);
+                width: 260px;
+                height: 100vh;
+                z-index: 60;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                padding: 16px 14px;
+            }
+            .hamburger {
+                display: block;
+            }
+            .sidebar-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: 55;
+            }
+            .sidebar-backdrop.show {
+                display: block;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            .stat-card .icon {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 12px 10px;
+            }
+            .table-wrap table {
+                font-size: 12px;
+            }
+            .table-wrap th,
+            .table-wrap td {
+                padding: 8px 10px;
+            }
+            .modal-box {
+                padding: 18px;
+            }
+        }
+        .finishing-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 6px 0;
+        }
+        .spot-color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .job-detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .job-detail-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 22px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: var(--shadow-lg);
+            z-index: 200;
+            animation: slideUp 0.3s ease;
+            max-width: 400px;
+        }
+        .toast-success {
+            background: var(--success);
+        }
+        .toast-error {
+            background: var(--danger);
+        }
+        .toast-info {
+            background: var(--accent);
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .view-container {
+            display: none;
+        }
+        .view-container.active {
+            display: block;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--gray-400);
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .filter-chip.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .filter-chip:hover {
+            background: var(--gray-200);
+        }
+        .filter-chip.active:hover {
+            background: #1d4ed8;
+        }
+        .grid-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 14px;
+        }
+        @media (max-width: 600px) {
+            .grid-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-400);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SIDEBAR BACKDROP (mobile) ===== -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <nav id="sidebar" class="sidebar fixed md:static top-0 left-0 flex flex-col">
+        <div class="logo">
+            <h1><i class="fas fa-print text-blue-400 mr-2"></i>PressFlow</h1>
+            <span>Prepress Job Manager</span>
+        </div>
+        <div class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+            <a href="#" data-view="dashboard" class="nav-link active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="#" data-view="create-job" class="nav-link"><i class="fas fa-plus-circle"></i> New Job</a>
+            <a href="#" data-view="jobs-list" class="nav-link"><i class="fas fa-list"></i> Jobs List</a>
+            <a href="#" data-view="users" class="nav-link admin-only" style="display:none"><i class="fas fa-users-cog"></i> Manage Users</a>
+        </div>
+        <div class="px-3 pb-4 border-t border-white/10 pt-3">
+            <div class="flex items-center gap-3 px-3 py-2 text-gray-400 text-sm">
+                <i class="fas fa-user-circle text-xl"></i>
+                <span id="sidebarUserName" class="truncate">User</span>
+            </div>
+            <button id="logoutBtn" class="nav-link !text-red-400 hover:!text-red-300 mt-1"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN LAYOUT ===== -->
+    <div class="flex min-h-screen">
+        <div class="main-content">
+
+            <!-- Top bar -->
+            <div class="flex items-center justify-between mb-6 gap-4">
+                <div class="flex items-center gap-3">
+                    <button id="hamburgerBtn" class="hamburger"><i class="fas fa-bars"></i></button>
+                    <h2 id="pageTitle" class="text-xl font-bold text-gray-800">Dashboard</h2>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-gray-500">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDateDisplay"></span>
+                </div>
+            </div>
+
+            <!-- ===== VIEW: DASHBOARD ===== -->
+            <div id="view-dashboard" class="view-container active">
+                <div class="grid-stats mb-6" id="statsGrid">
+                    <!-- populated by JS -->
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Recent Jobs</h3>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="btn btn-primary btn-sm" data-view="create-job"><i class="fas fa-plus"></i> New Job</button>
+                        <button class="btn btn-outline btn-sm" data-view="jobs-list"><i class="fas fa-search"></i> Search Jobs</button>
+                        <button class="btn btn-outline btn-sm admin-only" id="dashManageUsersBtn" data-view="users" style="display:none"><i class="fas fa-users-cog"></i> Manage Users</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap" id="recentJobsTableWrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Job #</th>
+                                <th>Date/Time</th>
+                                <th>Customer</th>
+                                <th>Description</th>
+                                <th>Process</th>
+                                <th>Artwork</th>
+                                <th>Designer</th>
+                                <th>Priority</th>
+                                <th>Deadline</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentJobsBody">
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state" id="dashboardEmpty" style="display:none">
+                        <i class="fas fa-inbox"></i>
+                        <p class="text-gray-500">No jobs yet. Create your first job!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== VIEW: CREATE JOB ===== -->
+            <div id="view-create-job" class="view-container">
+                <div class="card">
+                    <div class="card-title flex items-center gap-3">
+                        <i class="fas fa-file-alt text-blue-600"></i> Create New Job
+                    </div>
+                    <form id="createJobForm" novalidate>
+                        <!-- Auto fields -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                            <div>
+                                <label class="form-label">Job Number</label>
+                                <div class="form-input bg-gray-50 text-gray-500 cursor-not-allowed" id="newJobNumberDisplay">600000</div>
+                            </div>
+                            <div>
+                                <label class="form-label">Date &amp; Time</label>
+                                <div class="form-input bg-gray-50 text-gray-500 cursor-not-allowed" id="newJobDateTimeDisplay">-</div>
+                            </div>
+                            <div>
+                                <label class="form-label">Designer</label>
+                                <select id="newJobDesigner" class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">Priority</label>
+                                <select id="newJobPriority" class="form-input">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Required fields -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                            <div>
+                                <label class="form-label">Customer Name <span class="required">*</span></label>
+                                <input type="text" id="newJobCustomer" class="form-input" placeholder="e.g. Acme Printing" required>
+                            </div>
+                            <div>
+                                <label class="form-label">Job Description <span class="required">*</span></label>
+                                <input type="text" id="newJobDescription" class="form-input" placeholder="e.g. Brochure design &amp; print" required>
+                            </div>
+                        </div>
+
+                        <!-- Job Details -->
+                        <h4 class="section-title mt-6">Job Details</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                            <div>
+                                <label class="form-label">Printing Process</label>
+                                <select id="newJobProcess" class="form-input">
+                                    <option value="digital">Digital</option>
+                                    <option value="offset">Offset</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Artwork Type</label>
+                                <select id="newJobArtworkType" class="form-input">
+                                    <option value="label">Label</option>
+                                    <option value="packaging">Packaging</option>
+                                    <option value="book">Book</option>
+                                    <option value="book-cover">Book Cover</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="artworkTypeOtherWrap" style="display:none" class="mb-5">
+                            <label class="form-label">Please specify artwork type</label>
+                            <input type="text" id="newJobArtworkOther" class="form-input" placeholder="e.g. Banner">
+                        </div>
+
+                        <!-- Artwork Size -->
+                        <h4 class="section-title mt-6">Artwork Size</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5" id="sizeFields">
+                            <div>
+                                <label class="form-label">Width (mm)</label>
+                                <input type="number" id="newJobWidth" class="form-input" min="0" step="0.1" placeholder="e.g. 200">
+                            </div>
+                            <div>
+                                <label class="form-label">Height (mm)</label>
+                                <input type="number" id="newJobHeight" class="form-input" min="0" step="0.1" placeholder="e.g. 300">
+                            </div>
+                            <div id="lengthFieldWrap">
+                                <label class="form-label">Length (mm) <span id="lengthOptional" class="text-gray-400 text-xs"></span></label>
+                                <input type="number" id="newJobLength" class="form-input" min="0" step="0.1" placeholder="e.g. 80">
+                            </div>
+                        </div>
+
+                        <!-- Colors -->
+                        <h4 class="section-title mt-6">Colors</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                            <div>
+                                <label class="form-label">Color Mode</label>
+                                <select id="newJobColors" class="form-input">
+                                    <option value="cmyk">CMYK</option>
+                                    <option value="spot">Spot</option>
+                                    <option value="cmyk+spot">CMYK + Spot</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="spotColorsWrap" style="display:none" class="mb-5">
+                            <label class="form-label">Spot Color(s)</label>
+                            <div id="spotColorsList" class="space-y-2"></div>
+                            <button type="button" id="addSpotColorBtn" class="btn btn-outline btn-sm mt-2"><i class="fas fa-plus"></i> Add Spot Color</button>
+                        </div>
+
+                        <!-- Finishing -->
+                        <h4 class="section-title mt-6">Finishing</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-5" id="finishingOptions">
+                            <!-- populated by JS -->
+                        </div>
+
+                        <!-- Production & Assignment -->
+                        <h4 class="section-title mt-6">Production &amp; Assignment</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                            <div>
+                                <label class="form-label">Deadline</label>
+                                <input type="date" id="newJobDeadline" class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">Urgent</label>
+                                <div class="flex items-center gap-3 mt-2">
+                                    <span class="toggle-switch" id="urgentToggle"></span>
+                                    <span id="urgentLabel" class="text-sm text-gray-500">No</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 pt-4 border-t border-gray-200 mt-6">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Job</button>
+                            <button type="button" id="cancelNewJob" class="btn btn-outline"><i class="fas fa-times"></i> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== VIEW: JOBS LIST ===== -->
+            <div id="view-jobs-list" class="view-container">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">All Jobs</h3>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="btn btn-primary btn-sm" data-view="create-job"><i class="fas fa-plus"></i> New Job</button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-4" id="jobFilters">
+                    <span class="filter-chip active" data-filter="all">All</span>
+                    <span class="filter-chip" data-filter="new">New</span>
+                    <span class="filter-chip" data-filter="in-progress">In Progress</span>
+                    <span class="filter-chip" data-filter="pending-approval">Pending Approval</span>
+                    <span class="filter-chip" data-filter="approved">Approved</span>
+                    <span class="filter-chip" data-filter="completed">Completed</span>
+                    <span class="filter-chip" data-filter="urgent">Urgent</span>
+                    <span class="filter-chip" data-filter="overdue">Overdue</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Job #</th>
+                                <th>Date/Time</th>
+                                <th>Customer</th>
+                                <th>Description</th>
+                                <th>Process</th>
+                                <th>Artwork</th>
+                                <th>Designer</th>
+                                <th>Priority</th>
+                                <th>Deadline</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allJobsBody"></tbody>
+                    </table>
+                    <div class="empty-state" id="jobsListEmpty" style="display:none">
+                        <i class="fas fa-inbox"></i>
+                        <p class="text-gray-500">No jobs match your filters.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== VIEW: USERS (Admin only) ===== -->
+            <div id="view-users" class="view-container">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">User Management</h3>
+                    <button id="addUserBtn" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Add User</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody"></tbody>
+                    </table>
+                    <div class="empty-state" id="usersEmpty" style="display:none">
+                        <i class="fas fa-users"></i>
+                        <p class="text-gray-500">No users found.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== VIEW: JOB DETAIL (modal-like inline) ===== -->
+            <div id="view-job-detail" class="view-container">
+                <div class="card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800" id="jobDetailTitle">Job #600000</h3>
+                        <button id="closeJobDetail" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back</button>
+                    </div>
+                    <div id="jobDetailContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- populated by JS -->
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-gray-200 flex gap-3 flex-wrap" id="jobDetailActions">
+                        <!-- populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== MODAL CONTAINER ===== -->
+    <div id="modalContainer"></div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // ============================================================
+        //  DATA LAYER
+        // ============================================================
+
+        const STORAGE_KEYS = {
+            users: 'prepress_users',
+            jobs: 'prepress_jobs',
+            lastJobNumber: 'prepress_lastJobNumber',
+            currentUser: 'prepress_currentUser'
+        };
+
+        function getData(key) {
+            try {
+                const d = localStorage.getItem(key);
+                return d ? JSON.parse(d) : null;
+            } catch { return null; }
+        }
+
+        function setData(key, val) {
+            localStorage.setItem(key, JSON.stringify(val));
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        }
+
+        // ---- Users ----
+        function getUsers() { return getData(STORAGE_KEYS.users) || []; }
+
+        function saveUsers(users) { setData(STORAGE_KEYS.users, users); }
+
+        function findUser(username) {
+            return getUsers().find(u => u.username.toLowerCase() === username.toLowerCase());
+        }
+
+        // ---- Jobs ----
+        function getJobs() { return getData(STORAGE_KEYS.jobs) || []; }
+
+        function saveJobs(jobs) { setData(STORAGE_KEYS.jobs, jobs); }
+
+        function getLastJobNumber() {
+            const n = getData(STORAGE_KEYS.lastJobNumber);
+            if (n !== null && n !== undefined) return n;
+            return 600000;
+        }
+
+        function setLastJobNumber(n) { setData(STORAGE_KEYS.lastJobNumber, n); }
+
+        function generateJobNumber() {
+            let num = getLastJobNumber();
+            num += 1;
+            setLastJobNumber(num);
+            return num;
+        }
+
+        function formatDateTime(d) {
+            const months = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            const day = d.getDate().toString().padStart(2, '0');
+            const month = months[d.getMonth()];
+            const year = d.getFullYear();
+            let hours = d.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            const mins = d.getMinutes().toString().padStart(2, '0');
+            return `${day} ${month} ${year} – ${hours}:${mins} ${ampm}`;
+        }
+
+        function formatDateShort(d) {
+            const dd = d.getDate().toString().padStart(2, '0');
+            const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+            const yy = d.getFullYear();
+            return `${dd}/${mm}/${yy}`;
+        }
+
+        function todayStr() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function isOverdue(job) {
+            if (job.status === 'completed') return false;
+            if (!job.deadline) return false;
+            return job.deadline < todayStr();
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'new': 'badge-new',
+                'in-progress': 'badge-in-progress',
+                'pending-approval': 'badge-pending-approval',
+                'approved': 'badge-approved',
+                'completed': 'badge-completed'
+            };
+            const cls = map[status] || 'badge-new';
+            const label = status.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            return `<span class="badge ${cls}">${label}</span>`;
+        }
+
+        function getPriorityClass(priority) {
+            if (priority === 'high') return 'priority-high';
+            if (priority === 'medium') return 'priority-medium';
+            return 'priority-low';
+        }
+
+        function getPriorityLabel(priority) {
+            return priority.charAt(0).toUpperCase() + priority.slice(1);
+        }
+
+        // ---- Current User ----
+        function getCurrentUser() {
+            return getData(STORAGE_KEYS.currentUser);
+        }
+
+        function setCurrentUser(user) {
+            setData(STORAGE_KEYS.currentUser, user);
+        }
+
+        function clearCurrentUser() {
+            localStorage.removeItem(STORAGE_KEYS.currentUser);
+        }
+
+        function isAdmin() {
+            const u = getCurrentUser();
+            return u && u.role === 'admin';
+        }
+
+        // ============================================================
+        //  AUTH
+        // ============================================================
+
+        function showLogin() {
+            const container = document.getElementById('modalContainer');
+            const hasUsers = getUsers().length > 0;
+
+            let html = `
+                <div class="modal-overlay" id="authOverlay">
+                    <div class="modal-box max-w-md">
+                        <div class="text-center mb-6">
+                            <i class="fas fa-print text-4xl text-blue-600 mb-2"></i>
+                            <h2 class="text-2xl font-bold text-gray-800">PressFlow</h2>
+                            <p class="text-gray-500 text-sm">Prepress Job Manager</p>
+                        </div>
+                        ${!hasUsers ? `
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Admin Setup</h3>
+                            <p class="text-sm text-gray-500 mb-4">Create the first administrator account.</p>
+                            <div id="setupForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" id="setupName" class="form-input" placeholder="e.g. Rukshan Perera">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" id="setupUsername" class="form-input" placeholder="e.g. rukshan">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" id="setupPassword" class="form-input" placeholder="Min 4 characters">
+                                </div>
+                                <button id="setupAdminBtn" class="btn btn-primary w-full"><i class="fas fa-shield-alt"></i> Create Admin</button>
+                            </div>
+                        ` : `
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Login</h3>
+                            <div id="loginForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" id="loginUsername" class="form-input" placeholder="Enter your username">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password">
+                                </div>
+                                <button id="loginBtn" class="btn btn-primary w-full"><i class="fas fa-sign-in-alt"></i> Login</button>
+                                <p id="loginError" class="text-red-600 text-sm mt-2 hidden"></p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            if (!hasUsers) {
+                document.getElementById('setupAdminBtn').addEventListener('click', function() {
+                    const name = document.getElementById('setupName').value.trim();
+                    const username = document.getElementById('setupUsername').value.trim();
+                    const password = document.getElementById('setupPassword').value.trim();
+                    if (!name || !username || !password) {
+                        showToast('All fields are required.', 'error');
+                        return;
+                    }
+                    if (password.length < 4) {
+                        showToast('Password must be at least 4 characters.', 'error');
+                        return;
+                    }
+                    if (findUser(username)) {
+                        showToast('Username already exists.', 'error');
+                        return;
+                    }
+                    const users = getUsers();
+                    const newUser = {
+                        id: generateId(),
+                        fullName: name,
+                        username: username,
+                        password: password,
+                        role: 'admin',
+                        disabled: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    users.push(newUser);
+                    saveUsers(users);
+                    setCurrentUser(newUser);
+                    container.innerHTML = '';
+                    initApp();
+                    showToast('Admin account created! Welcome.', 'success');
+                });
+            } else {
+                document.getElementById('loginBtn').addEventListener('click', function() {
+                    const username = document.getElementById('loginUsername').value.trim();
+                    const password = document.getElementById('loginPassword').value.trim();
+                    const errEl = document.getElementById('loginError');
+                    errEl.classList.add('hidden');
+                    if (!username || !password) {
+                        errEl.textContent = 'Please enter username and password.';
+                        errEl.classList.remove('hidden');
+                        return;
+                    }
+                    const user = findUser(username);
+                    if (!user || user.password !== password) {
+                        errEl.textContent = 'Invalid username or password.';
+                        errEl.classList.remove('hidden');
+                        return;
+                    }
+                    if (user.disabled) {
+                        errEl.textContent = 'This account has been disabled. Contact admin.';
+                        errEl.classList.remove('hidden');
+                        return;
+                    }
+                    setCurrentUser(user);
+                    container.innerHTML = '';
+                    initApp();
+                    showToast('Welcome, ' + user.fullName + '!', 'success');
+                });
+                // Enter key support
+                document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+                });
+            }
+        }
+
+        function logout() {
+            clearCurrentUser();
+            document.body.innerHTML = `
+                <div id="modalContainer"></div>
+                <div id="toastContainer"></div>
+            `;
+            showLogin();
+        }
+
+        // ============================================================
+        //  TOAST
+        // ============================================================
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.innerHTML = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.3s';
+                setTimeout(() => el.remove(), 300);
+            }, 3500);
+        }
+
+        // ============================================================
+        //  RENDER FUNCTIONS
+        // ============================================================
+
+        function renderStats() {
+            const jobs = getJobs();
+            const now = todayStr();
+            const total = jobs.length;
+            const newJobs = jobs.filter(j => j.status === 'new').length;
+            const inProgress = jobs.filter(j => j.status === 'in-progress').length;
+            const pendingApproval = jobs.filter(j => j.status === 'pending-approval').length;
+            const approved = jobs.filter(j => j.status === 'approved').length;
+            const completed = jobs.filter(j => j.status === 'completed').length;
+            const urgent = jobs.filter(j => j.urgent).length;
+            const overdue = jobs.filter(j => isOverdue(j)).length;
+
+            const stats = [
+                { label: 'Total Jobs', value: total, icon: 'fas fa-briefcase', color: 'bg-blue-100 text-blue-600' },
+                { label: 'New', value: newJobs, icon: 'fas fa-sparkles', color: 'bg-indigo-100 text-indigo-600' },
+                { label: 'In Progress', value: inProgress, icon: 'fas fa-spinner', color: 'bg-amber-100 text-amber-600' },
+                { label: 'Pending Approval', value: pendingApproval, icon: 'fas fa-clock', color: 'bg-rose-100 text-rose-600' },
+                { label: 'Approved', value: approved, icon: 'fas fa-check-circle', color: 'bg-emerald-100 text-emerald-600' },
+                { label: 'Completed', value: completed, icon: 'fas fa-flag-checkered', color: 'bg-violet-100 text-violet-600' },
+                { label: 'Urgent', value: urgent, icon: 'fas fa-exclamation-triangle', color: 'bg-red-100 text-red-600' },
+                { label: 'Overdue', value: overdue, icon: 'fas fa-calendar-times', color: 'bg-pink-100 text-pink-600' },
+            ];
+
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = stats.map(s => `
+                <div class="stat-card flex items-center gap-4">
+                    <div class="icon ${s.color}">${s.icon.includes('fa-') ? `<i class="${s.icon}"></i>` : s.icon}</div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-800">${s.value}</div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">${s.label}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRecentJobs() {
+            const jobs = getJobs().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 15);
+            const tbody = document.getElementById('recentJobsBody');
+            const empty = document.getElementById('dashboardEmpty');
+
+            if (jobs.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            tbody.innerHTML = jobs.map(j => {
+                const dt = new Date(j.createdAt);
+                const deadline = j.deadline ? formatDateShort(new Date(j.deadline + 'T12:00:00')) : '-';
+                const urg = j.urgent ? '<span class="badge badge-urgent ml-1">Urgent</span>' : '';
+                const ov = isOverdue(j) ? '<span class="badge badge-overdue ml-1">Overdue</span>' : '';
+                return `
+                    <tr>
+                        <td class="font-semibold text-gray-800">${j.jobNumber}</td>
+                        <td class="text-xs text-gray-500">${formatDateTime(dt)}</td>
+                        <td>${escHtml(j.customerName)}</td>
+                        <td class="max-w-[160px] truncate" title="${escHtml(j.jobDescription)}">${escHtml(j.jobDescription)}</td>
+                        <td><span class="badge ${j.printingProcess === 'digital' ? 'badge-digital' : 'badge-offset'}">${j.printingProcess}</span></td>
+                        <td>${j.artworkType}${j.artworkTypeOther ? ' (' + escHtml(j.artworkTypeOther) + ')' : ''}</td>
+                        <td>${escHtml(j.designer)}</td>
+                        <td><span class="${getPriorityClass(j.priority)}">${getPriorityLabel(j.priority)}</span></td>
+                        <td class="text-sm">${deadline}${urg}${ov}</td>
+                        <td>${getStatusBadge(j.status)}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm view-job-btn" data-job="${j.jobNumber}"><i class="fas fa-eye"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAllJobs(filter = 'all') {
+            let jobs = getJobs().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            if (filter === 'urgent') jobs = jobs.filter(j => j.urgent);
+            else if (filter === 'overdue') jobs = jobs.filter(j => isOverdue(j));
+            else if (filter !== 'all') jobs = jobs.filter(j => j.status === filter);
+
+            const tbody = document.getElementById('allJobsBody');
+            const empty = document.getElementById('jobsListEmpty');
+
+            if (jobs.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            tbody.innerHTML = jobs.map(j => {
+                const dt = new Date(j.createdAt);
+                const deadline = j.deadline ? formatDateShort(new Date(j.deadline + 'T12:00:00')) : '-';
+                const urg = j.urgent ? '<span class="badge badge-urgent ml-1">Urgent</span>' : '';
+                const ov = isOverdue(j) ? '<span class="badge badge-overdue ml-1">Overdue</span>' : '';
+                return `
+                    <tr>
+                        <td class="font-semibold text-gray-800">${j.jobNumber}</td>
+                        <td class="text-xs text-gray-500">${formatDateTime(dt)}</td>
+                        <td>${escHtml(j.customerName)}</td>
+                        <td class="max-w-[160px] truncate" title="${escHtml(j.jobDescription)}">${escHtml(j.jobDescription)}</td>
+                        <td><span class="badge ${j.printingProcess === 'digital' ? 'badge-digital' : 'badge-offset'}">${j.printingProcess}</span></td>
+                        <td>${j.artworkType}${j.artworkTypeOther ? ' (' + escHtml(j.artworkTypeOther) + ')' : ''}</td>
+                        <td>${escHtml(j.designer)}</td>
+                        <td><span class="${getPriorityClass(j.priority)}">${getPriorityLabel(j.priority)}</span></td>
+                        <td class="text-sm">${deadline}${urg}${ov}</td>
+                        <td>${getStatusBadge(j.status)}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm view-job-btn" data-job="${j.jobNumber}"><i class="fas fa-eye"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderUsers() {
+            const users = getUsers();
+            const tbody = document.getElementById('usersBody');
+            const empty = document.getElementById('usersEmpty');
+            if (users.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            tbody.innerHTML = users.map(u => {
+                const created = u.createdAt ? formatDateShort(new Date(u.createdAt)) : '-';
+                const status = u.disabled ?
+                    '<span class="badge bg-red-100 text-red-700">Disabled</span>' :
+                    '<span class="badge bg-green-100 text-green-700">Active</span>';
+                return `
+                    <tr>
+                        <td class="font-semibold">${escHtml(u.fullName)}</td>
+                        <td>${escHtml(u.username)}</td>
+                        <td><span class="badge ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}">${u.role}</span></td>
+                        <td>${status}</td>
+                        <td class="text-sm text-gray-500">${created}</td>
+                        <td>
+                            <button class="btn btn-outline btn-sm edit-user-btn" data-userid="${u.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm delete-user-btn" data-userid="${u.id}" ${u.role === 'admin' && getUsers().filter(x => x.role === 'admin').length === 1 ? 'disabled title="Cannot delete the only admin"' : ''}><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderJobDetail(jobNumber) {
+            const job = getJobs().find(j => j.jobNumber === jobNumber);
+            if (!job) {
+                showToast('Job not found.', 'error');
+                showView('dashboard');
+                return;
+            }
+
+            document.getElementById('jobDetailTitle').textContent = `Job #${job.jobNumber}`;
+            const dt = new Date(job.createdAt);
+            const deadline = job.deadline ? formatDateShort(new Date(job.deadline + 'T12:00:00')) : 'Not set';
+            const urg = job.urgent ? 'Yes' : 'No';
+            const ov = isOverdue(job) ? '<span class="badge badge-overdue">Overdue</span>' : '';
+
+            const spotColors = job.spotColors && job.spotColors.length ? job.spotColors.join(', ') : 'N/A';
+
+            let finishingHtml = 'None';
+            if (job.finishing && job.finishing.length) {
+                finishingHtml = job.finishing.map(f => `${f.type} (${f.status})`).join(', ');
+            }
+
+            let sizeHtml = `${job.width || '-'} × ${job.height || '-'} mm`;
+            if (job.length !== null && job.length !== undefined && job.length !== '') {
+                sizeHtml += ` × ${job.length} mm`;
+            }
+
+            const content = document.getElementById('jobDetailContent');
+            content.innerHTML = `
+                <div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Customer Name</div>
+                        <div class="job-detail-value">${escHtml(job.customerName)}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Job Description</div>
+                        <div class="job-detail-value">${escHtml(job.jobDescription)}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Date Created</div>
+                        <div class="job-detail-value">${formatDateTime(dt)}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Printing Process</div>
+                        <div class="job-detail-value">${job.printingProcess}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Artwork Type</div>
+                        <div class="job-detail-value">${job.artworkType}${job.artworkTypeOther ? ' (' + escHtml(job.artworkTypeOther) + ')' : ''}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Artwork Size</div>
+                        <div class="job-detail-value">${sizeHtml}</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Colors</div>
+                        <div class="job-detail-value">${job.colors.toUpperCase()} ${job.colors !== 'cmyk' ? '— ' + spotColors : ''}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Finishing</div>
+                        <div class="job-detail-value">${finishingHtml}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Designer</div>
+                        <div class="job-detail-value">${escHtml(job.designer)}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Priority</div>
+                        <div class="job-detail-value ${getPriorityClass(job.priority)}">${getPriorityLabel(job.priority)}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Deadline</div>
+                        <div class="job-detail-value">${deadline} ${ov}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Urgent</div>
+                        <div class="job-detail-value">${urg}</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="job-detail-label">Status</div>
+                        <div class="job-detail-value">${getStatusBadge(job.status)}</div>
+                    </div>
+                </div>
+            `;
+
+            const actions = document.getElementById('jobDetailActions');
+            const statuses = ['new', 'in-progress', 'pending-approval', 'approved', 'completed'];
+            actions.innerHTML = `
+                <span class="text-sm text-gray-500 font-medium mr-2 self-center">Change Status:</span>
+                ${statuses.map(s => {
+                    const active = job.status === s;
+                    const label = s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    return `<button class="btn btn-sm ${active ? 'btn-primary' : 'btn-outline'} change-status-btn" data-job="${job.jobNumber}" data-status="${s}" ${active ? 'disabled' : ''}>${label}</button>`;
+                }).join('')}
+                <span class="flex-1"></span>
+                <button class="btn btn-danger btn-sm delete-job-btn" data-job="${job.jobNumber}"><i class="fas fa-trash"></i> Delete Job</button>
+            `;
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ============================================================
+        //  CREATE JOB FORM LOGIC
+        // ============================================================
+
+        function initCreateJobForm() {
+            // Set job number
+            const nextNum = getLastJobNumber() + 1;
+            document.getElementById('newJobNumberDisplay').textContent = nextNum;
+            document.getElementById('newJobDateTimeDisplay').textContent = formatDateTime(new Date());
+
+            // Designer dropdown
+            const users = getUsers().filter(u => !u.disabled);
+            const current = getCurrentUser();
+            const sel = document.getElementById('newJobDesigner');
+            sel.innerHTML = users.map(u =>
+                `<option value="${u.fullName}" ${current && u.id === current.id ? 'selected' : ''}>${escHtml(u.fullName)}</option>`
+            ).join('');
+
+            // Reset fields
+            document.getElementById('newJobCustomer').value = '';
+            document.getElementById('newJobCustomer').classList.remove('error');
+            document.getElementById('newJobDescription').value = '';
+            document.getElementById('newJobDescription').classList.remove('error');
+            document.getElementById('newJobArtworkOther').value = '';
+            document.getElementById('newJobWidth').value = '';
+            document.getElementById('newJobHeight').value = '';
+            document.getElementById('newJobLength').value = '';
+            document.getElementById('newJobDeadline').value = '';
+            document.getElementById('newJobProcess').value = 'digital';
+            document.getElementById('newJobArtworkType').value = 'label';
+            document.getElementById('newJobColors').value = 'cmyk';
+            document.getElementById('newJobPriority').value = 'medium';
+            document.getElementById('urgentToggle').classList.remove('active');
+            document.getElementById('urgentLabel').textContent = 'No';
+
+            // Reset spot colors
+            document.getElementById('spotColorsList').innerHTML = '';
+            addSpotColorField();
+
+            // Reset finishing
+            renderFinishingOptions();
+
+            // Artwork type logic
+            handleArtworkTypeChange();
+            handleColorChange();
+        }
+
+        function renderFinishingOptions() {
+            const options = [
+                'Lamination', 'UV', 'Spot UV', 'Foiling', 'Die Cut', 'Emboss', 'Window Cut', 'Texture UV'
+            ];
+            const container = document.getElementById('finishingOptions');
+            container.innerHTML = options.map(o => {
+                const id = `finish_${o.replace(/\s+/g, '_')}`;
+                return `
+                    <div class="finishing-row bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="finish-checkbox" data-finish="${o}" id="${id}">
+                            <span class="text-sm font-medium text-gray-700">${o}</span>
+                        </label>
+                        <div class="finish-status-wrap flex gap-2 ml-6 mt-1" style="display:none" data-finish="${o}">
+                            <label class="text-xs text-gray-500 flex items-center gap-1">
+                                <input type="radio" name="finish_status_${o}" value="new" checked class="finish-status-radio"> New
+                            </label>
+                            <label class="text-xs text-gray-500 flex items-center gap-1">
+                                <input type="radio" name="finish_status_${o}" value="old" class="finish-status-radio"> Old
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Event delegation for checkboxes
+            container.querySelectorAll('.finish-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const wrap = container.querySelector(`.finish-status-wrap[data-finish="${this.dataset.finish}"]`);
+                    if (wrap) {
+                        wrap.style.display = this.checked ? 'flex' : 'none';
+                    }
+                });
+            });
+        }
+
+        function addSpotColorField() {
+            const list = document.getElementById('spotColorsList');
+            const idx = list.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'spot-color-row';
+            div.innerHTML = `
+                <input type="text" class="form-input spot-color-input" placeholder="e.g. Pantone 186 C" data-idx="${idx}">
+                <button type="button" class="btn btn-danger btn-sm remove-spot-color" style="padding:6px 10px;"><i class="fas fa-times"></i></button>
+            `;
+            list.appendChild(div);
+            div.querySelector('.remove-spot-color').addEventListener('click', function() {
+                if (list.children.length > 1) {
+                    div.remove();
+                } else {
+                    showToast('At least one spot color field is required.', 'error');
+                }
+            });
+        }
+
+        function handleArtworkTypeChange() {
+            const type = document.getElementById('newJobArtworkType').value;
+            const otherWrap = document.getElementById('artworkTypeOtherWrap');
+            const lengthWrap = document.getElementById('lengthFieldWrap');
+            const lengthOptional = document.getElementById('lengthOptional');
+
+            otherWrap.style.display = type === 'other' ? 'block' : 'none';
+
+            if (type === 'packaging') {
+                lengthWrap.style.display = 'block';
+                lengthOptional.textContent = '(required)';
+                document.getElementById('newJobLength').required = false;
+            } else if (type === 'other') {
+                lengthWrap.style.display = 'block';
+                lengthOptional.textContent = '(optional)';
+                document.getElementById('newJobLength').required = false;
+            } else {
+                lengthWrap.style.display = 'none';
+            }
+        }
+
+        function handleColorChange() {
+            const val = document.getElementById('newJobColors').value;
+            const wrap = document.getElementById('spotColorsWrap');
+            wrap.style.display = (val === 'spot' || val === 'cmyk+spot') ? 'block' : 'none';
+        }
+
+        function collectFinishingData() {
+            const items = [];
+            document.querySelectorAll('.finish-checkbox').forEach(cb => {
+                if (cb.checked) {
+                    const type = cb.dataset.finish;
+                    const statusRadio = document.querySelector(`input[name="finish_status_${type}"]:checked`);
+                    items.push({
+                        type: type,
+                        status: statusRadio ? statusRadio.value : 'new'
+                    });
+                }
+            });
+            return items;
+        }
+
+        function collectSpotColors() {
+            const inputs = document.querySelectorAll('.spot-color-input');
+            const colors = [];
+            inputs.forEach(inp => {
+                const val = inp.value.trim();
+                if (val) colors.push(val);
+            });
+            return colors;
+        }
+
+        // ============================================================
+        //  VIEW MANAGEMENT
+        // ============================================================
+
+        function showView(viewName) {
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+            const el = document.getElementById('view-' + viewName);
+            if (el) el.classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const link = document.querySelector(`.nav-link[data-view="${viewName}"]`);
+            if (link) link.classList.add('active');
+
+            const titles = {
+                'dashboard': 'Dashboard',
+                'create-job': 'Create New Job',
+                'jobs-list': 'Jobs List',
+                'users': 'User Management',
+                'job-detail': 'Job Details'
+            };
+            document.getElementById('pageTitle').textContent = titles[viewName] || 'Dashboard';
+
+            // Refresh data for relevant views
+            if (viewName === 'dashboard') {
+                renderStats();
+                renderRecentJobs();
+            }
+            if (viewName === 'jobs-list') {
+                const activeFilter = document.querySelector('#jobFilters .filter-chip.active');
+                const filter = activeFilter ? activeFilter.dataset.filter : 'all';
+                renderAllJobs(filter);
+            }
+            if (viewName === 'users') {
+                renderUsers();
+            }
+            if (viewName === 'create-job') {
+                initCreateJobForm();
+            }
+
+            // Close sidebar on mobile
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarBackdrop').classList.remove('show');
+        }
+
+        // ============================================================
+        //  MOUNT & EVENT DELEGATION
+        // ============================================================
+
+        function initApp() {
+            const current = getCurrentUser();
+            if (!current) {
+                showLogin();
+                return;
+            }
+
+            // Show/hide admin elements
+            const adminEls = document.querySelectorAll('.admin-only');
+            adminEls.forEach(el => {
+                el.style.display = isAdmin() ? '' : 'none';
+            });
+
+            // Sidebar user name
+            document.getElementById('sidebarUserName').textContent = current.fullName;
+
+            // Date display
+            const now = new Date();
+            document.getElementById('currentDateDisplay').textContent = now.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+
+            // Show dashboard by default
+            showView('dashboard');
+
+            // ---- Navigation clicks ----
+            document.querySelectorAll('.nav-link[data-view]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const view = this.dataset.view;
+                    if (view === 'users' && !isAdmin()) {
+                        showToast('Admin access required.', 'error');
+                        return;
+                    }
+                    showView(view);
+                });
+            });
+
+            // ---- Hamburger ----
+            document.getElementById('hamburgerBtn').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('sidebarBackdrop').classList.toggle('show');
+            });
+            document.getElementById('sidebarBackdrop').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.remove('open');
+                this.classList.remove('show');
+            });
+
+            // ---- Logout ----
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                logout();
+            });
+
+            // ---- Dashboard "New Job" & "Search Jobs" buttons ----
+            document.querySelectorAll('[data-view="create-job"]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView('create-job');
+                });
+            });
+            document.querySelectorAll('[data-view="jobs-list"]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView('jobs-list');
+                });
+            });
+            document.querySelectorAll('[data-view="users"]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (!isAdmin()) { showToast('Admin access required.', 'error'); return; }
+                    showView('users');
+                });
+            });
+
+            // ---- Job Filters ----
+            document.querySelectorAll('#jobFilters .filter-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('#jobFilters .filter-chip').forEach(c => c.classList.remove(
+                        'active'));
+                    this.classList.add('active');
+                    renderAllJobs(this.dataset.filter);
+                });
+            });
+
+            // ---- Create Job Form ----
+            document.getElementById('newJobArtworkType').addEventListener('change', handleArtworkTypeChange);
+            document.getElementById('newJobColors').addEventListener('change', handleColorChange);
+            document.getElementById('addSpotColorBtn').addEventListener('click', addSpotColorField);
+            document.getElementById('urgentToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('urgentLabel').textContent = this.classList.contains('active') ? 'Yes' : 'No';
+            });
+
+            document.getElementById('cancelNewJob').addEventListener('click', function() {
+                showView('dashboard');
+            });
+
+            document.getElementById('createJobForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const customer = document.getElementById('newJobCustomer').value.trim();
+                const description = document.getElementById('newJobDescription').value.trim();
+                let valid = true;
+
+                const custEl = document.getElementById('newJobCustomer');
+                const descEl = document.getElementById('newJobDescription');
+                custEl.classList.remove('error');
+                descEl.classList.remove('error');
+
+                if (!customer) { custEl.classList.add('error');
+                    valid = false; }
+                if (!description) { descEl.classList.add('error');
+                    valid = false; }
+                if (!valid) {
+                    showToast('Please fill in all required fields.', 'error');
+                    return;
+                }
+
+                const jobNumber = parseInt(document.getElementById('newJobNumberDisplay').textContent);
+                const artworkType = document.getElementById('newJobArtworkType').value;
+                const artworkOther = document.getElementById('newJobArtworkOther').value.trim();
+
+                // Validate artwork other
+                if (artworkType === 'other' && !artworkOther) {
+                    showToast('Please specify the artwork type.', 'error');
+                    return;
+                }
+
+                const width = parseFloat(document.getElementById('newJobWidth').value) || null;
+                const height = parseFloat(document.getElementById('newJobHeight').value) || null;
+                let length = null;
+                if (document.getElementById('lengthFieldWrap').style.display !== 'none') {
+                    const l = document.getElementById('newJobLength').value;
+                    if (l !== '') length = parseFloat(l) || null;
+                    if (artworkType === 'packaging' && (length === null || length === 0)) {
+                        showToast('Length is required for Packaging artwork.', 'error');
+                        return;
+                    }
+                }
+
+                const spotColors = collectSpotColors();
+                const colorsVal = document.getElementById('newJobColors').value;
+                if ((colorsVal === 'spot' || colorsVal === 'cmyk+spot') && spotColors.length === 0) {
+                    showToast('Please enter at least one spot color.', 'error');
+                    return;
+                }
+
+                const finishing = collectFinishingData();
+                const designer = document.getElementById('newJobDesigner').value;
+                const priority = document.getElementById('newJobPriority').value;
+                const deadline = document.getElementById('newJobDeadline').value || null;
+                const urgent = document.getElementById('urgentToggle').classList.contains('active');
+
+                const job = {
+                    jobNumber: jobNumber,
+                    createdAt: new Date().toISOString(),
+                    customerName: customer,
+                    jobDescription: description,
+                    printingProcess: document.getElementById('newJobProcess').value,
+                    artworkType: artworkType,
+                    artworkTypeOther: artworkOther || null,
+                    width: width,
+                    height: height,
+                    length: length,
+                    colors: colorsVal,
+                    spotColors: spotColors,
+                    finishing: finishing,
+                    designer: designer,
+                    priority: priority,
+                    deadline: deadline,
+                    urgent: urgent,
+                    status: 'new',
+                    createdBy: getCurrentUser().id
+                };
+
+                const jobs = getJobs();
+                // Double-check duplicate job number
+                if (jobs.find(j => j.jobNumber === jobNumber)) {
+                    showToast('Job number conflict. Please try again.', 'error');
+                    return;
+                }
+                jobs.push(job);
+                saveJobs(jobs);
+                setLastJobNumber(jobNumber);
+
+                showToast(`Job #${jobNumber} created successfully!`, 'success');
+                showView('dashboard');
+            });
+
+            // ---- View Job Button (delegated) ----
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.view-job-btn');
+                if (btn) {
+                    const jobNum = parseInt(btn.dataset.job);
+                    renderJobDetail(jobNum);
+                    showView('job-detail');
+                }
+            });
+
+            // ---- Close Job Detail ----
+            document.getElementById('closeJobDetail').addEventListener('click', function() {
+                const from = document.querySelector('.view-container.active')?.id;
+                if (from === 'view-job-detail') {
+                    // Go back to the previous view or dashboard
+                    showView('dashboard');
+                } else {
+                    showView('dashboard');
+                }
+            });
+
+            // ---- Change Status (delegated) ----
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.change-status-btn');
+                if (btn && !btn.disabled) {
+                    const jobNum = parseInt(btn.dataset.job);
+                    const newStatus = btn.dataset.status;
+                    const jobs = getJobs();
+                    const job = jobs.find(j => j.jobNumber === jobNum);
+                    if (job) {
+                        job.status = newStatus;
+                        saveJobs(jobs);
+                        renderJobDetail(jobNum);
+                        showToast(`Job #${jobNum} status changed to ${newStatus.replace(/-/g, ' ')}.`, 'success');
+                    }
+                }
+            });
+
+            // ---- Delete Job (delegated) ----
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.delete-job-btn');
+                if (btn) {
+                    const jobNum = parseInt(btn.dataset.job);
+                    if (confirm(`Are you sure you want to delete Job #${jobNum}? This cannot be undone.`)) {
+                        let jobs = getJobs();
+                        jobs = jobs.filter(j => j.jobNumber !== jobNum);
+                        saveJobs(jobs);
+                        showToast(`Job #${jobNum} deleted.`, 'info');
+                        showView('dashboard');
+                    }
+                }
+            });
+
+            // ---- User Management ----
+            document.getElementById('addUserBtn').addEventListener('click', function() {
+                showUserModal();
+            });
+
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.edit-user-btn');
+                if (btn) {
+                    const userId = btn.dataset.userid;
+                    const user = getUsers().find(u => u.id === userId);
+                    if (user) showUserModal(user);
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.delete-user-btn');
+                if (btn && !btn.disabled) {
+                    const userId = btn.dataset.userid;
+                    const user = getUsers().find(u => u.id === userId);
+                    if (!user) return;
+                    if (user.role === 'admin' && getUsers().filter(u => u.role === 'admin').length === 1) {
+                        showToast('Cannot delete the only admin account.', 'error');
+                        return;
+                    }
+                    if (confirm(`Delete user "${user.fullName}"?`)) {
+                        let users = getUsers();
+                        users = users.filter(u => u.id !== userId);
+                        saveUsers(users);
+                        renderUsers();
+                        showToast('User deleted.', 'info');
+                    }
+                }
+            });
+        }
+
+        // ============================================================
+        //  USER MODAL
+        // ============================================================
+
+        function showUserModal(existingUser = null) {
+            const isEdit = !!existingUser;
+            const container = document.getElementById('modalContainer');
+            container.innerHTML = `
+                <div class="modal-overlay" id="userModalOverlay">
+                    <div class="modal-box max-w-md">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">${isEdit ? 'Edit User' : 'Add User'}</h3>
+                        <form id="userForm">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name <span class="required">*</span></label>
+                                <input type="text" id="userName" class="form-input" value="${isEdit ? escHtml(existingUser.fullName) : ''}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Username <span class="required">*</span></label>
+                                <input type="text" id="userUsername" class="form-input" value="${isEdit ? escHtml(existingUser.username) : ''}" ${isEdit ? 'readonly' : ''} required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password ${isEdit ? '<span class="text-gray-400 text-xs">(leave blank to keep current)</span>' : '<span class="required">*</span>'}</label>
+                                <input type="password" id="userPassword" class="form-input" placeholder="${isEdit ? 'New password (optional)' : 'Min 4 characters'}" ${isEdit ? '' : 'required'}>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Role</label>
+                                <select id="userRole" class="form-input">
+                                    <option value="designer" ${isEdit && existingUser.role === 'designer' ? 'selected' : ''}>Designer / User</option>
+                                    <option value="admin" ${isEdit && existingUser.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                </select>
+                            </div>
+                            ${isEdit ? `
+                                <div class="mb-3 flex items-center gap-3">
+                                    <span class="form-label mb-0">Disabled</span>
+                                    <span class="toggle-switch ${existingUser.disabled ? 'active' : ''}" id="userDisabledToggle"></span>
+                                    <span id="userDisabledLabel" class="text-sm text-gray-500">${existingUser.disabled ? 'Yes' : 'No'}</span>
+                                </div>
+                            ` : ''}
+                            <div class="flex gap-3 mt-4">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ${isEdit ? 'Update' : 'Create'} User</button>
+                                <button type="button" id="cancelUserModal" class="btn btn-outline">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            if (isEdit) {
+                const toggle = document.getElementById('userDisabledToggle');
+                const label = document.getElementById('userDisabledLabel');
+                toggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    label.textContent = this.classList.contains('active') ? 'Yes' : 'No';
+                });
+            }
+
+            document.getElementById('cancelUserModal').addEventListener('click', () => container.innerHTML = '');
+            document.getElementById('userModalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) container.innerHTML = '';
+            });
+
+            document.getElementById('userForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('userName').value.trim();
+                const username = document.getElementById('userUsername').value.trim();
+                const password = document.getElementById('userPassword').value;
+                const role = document.getElementById('userRole').value;
+
+                if (!name || !username) {
+                    showToast('Name and username are required.', 'error');
+                    return;
+                }
+
+                let users = getUsers();
+
+                if (isEdit) {
+                    const user = users.find(u => u.id === existingUser.id);
+                    if (!user) { showToast('User not found.', 'error'); return; }
+                    user.fullName = name;
+                    if (password && password.length >= 4) user.password = password;
+                    user.role = role;
+                    const disabledToggle = document.getElementById('userDisabledToggle');
+                    if (disabledToggle) {
+                        user.disabled = disabledToggle.classList.contains('active');
+                    }
+                    // Cannot disable the only admin
+                    if (user.disabled && user.role === 'admin' && users.filter(u => u.role === 'admin' && !u.disabled)
+                        .length === 1) {
+                        showToast('Cannot disable the only active admin.', 'error');
+                        return;
+                    }
+                    saveUsers(users);
+                    showToast('User updated.', 'success');
+                } else {
+                    if (findUser(username)) {
+                        showToast('Username already exists.', 'error');
+                        return;
+                    }
+                    if (!password || password.length < 4) {
+                        showToast('Password must be at least 4 characters.', 'error');
+                        return;
+                    }
+                    const newUser = {
+                        id: generateId(),
+                        fullName: name,
+                        username: username,
+                        password: password,
+                        role: role,
+                        disabled: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    users.push(newUser);
+                    saveUsers(users);
+                    showToast('User created.', 'success');
+                }
+                container.innerHTML = '';
+                renderUsers();
+            });
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const current = getCurrentUser();
+            if (current) {
+                const users = getUsers();
+                const stillExists = users.find(u => u.id === current.id && !u.disabled);
+                if (!stillExists) {
+                    clearCurrentUser();
+                    showLogin();
+                    return;
+                }
+                setCurrentUser(stillExists);
+                initApp();
+            } else {
+                showLogin();
+            }
+        });
+    </script>
+</body>
+</html>
